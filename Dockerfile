@@ -74,3 +74,5 @@ RUN mkdir -p ~/.vim/pack/themes/start && \
 RUN git clone https://github.com/hy38/mvim ~/mvim && \
     cd ~/mvim && \
     ./install.sh
+
+WORKDIR /ctf
