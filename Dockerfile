@@ -75,4 +75,7 @@ RUN git clone https://github.com/hy38/mvim ~/mvim && \
     cd ~/mvim && \
     ./install.sh
 
+# Remove Z-binding
+RUN sed -i '/"Z": menu-complete-backward/d' /etc/inputrc
+
 WORKDIR /ctf
