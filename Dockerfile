@@ -9,16 +9,18 @@
 #
 
 ARG image=mcr.microsoft.com/devcontainers/base:jammy
-FROM $image AS base
+FROM --platform=linux/amd64 ${image} AS base
 
 WORKDIR /pwndbg
 
 ENV PIP_NO_CACHE_DIR=true
 ENV LANG en_US.utf8
-ENV TZ=America/New_York
+ENV TZ=Asia/Seoul
 ENV ZIGPATH=/opt/zig
 ENV PWNDBG_VENV_PATH=/venv
 ENV UV_PROJECT_ENVIRONMENT=/venv
+
+RUN sed -i 's|http://.*.ubuntu.com|http://mirror.kakao.com|g' /etc/apt/sources.list
 
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
@@ -39,8 +41,8 @@ RUN touch README.md && mkdir pwndbg && touch pwndbg/empty.py
 RUN DEBIAN_FRONTEND=noninteractive ./setup.sh
 
 # Comment these lines if you won't run the tests.
-ADD ./setup-dev.sh /pwndbg/
-RUN ./setup-dev.sh
+#ADD ./setup-dev.sh /pwndbg/
+#RUN ./setup-dev.sh
 
 # Cleanup dummy files
 RUN rm README.md && rm -rf pwndbg
@@ -59,3 +61,16 @@ RUN if [ ! -f ~/.gdbinit ]; then echo "source /pwndbg/gdbinit.py" >> ~/.gdbinit;
     if id -u ${LOW_PRIVILEGE_USER} > /dev/null 2>&1; then \
         su ${LOW_PRIVILEGE_USER} -c 'if [ ! -f ~/.gdbinit ]; then echo "source /pwndbg/gdbinit.py" >> ~/.gdbinit; fi'; \
     fi
+
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get install -y make unzip
+
+# Install gruvbox
+RUN mkdir -p ~/.vim/pack/themes/start && \
+    git clone https://github.com/morhetz/gruvbox.git ~/.vim/pack/themes/start/gruvbox
+
+
+# Apply mvim
+RUN git clone https://github.com/hy38/mvim ~/mvim && \
+    cd ~/mvim && \
+    ./install.sh
